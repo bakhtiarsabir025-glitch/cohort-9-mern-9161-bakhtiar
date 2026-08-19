@@ -8,7 +8,7 @@ const tokenBlacklist = new Set();
 // ============ SIGNUP ============
 const signup = async (req, res, next) => {
     try {
-        console.log('📝 Signup - Request body:', req.body);
+        console.log('📝 Signup - Request received');
 
         const { email, password } = req.body;
 
@@ -37,8 +37,9 @@ const signup = async (req, res, next) => {
             });
         }
 
-        logger.info(`✅ Successful signup for user: ${email}`);
-        console.log(`✅ User created: ${email}`);
+        // ✅ SECURE: Log user ID instead of email
+        logger.info(`✅ Successful signup for user ID: ${data.user.id}`);
+        console.log(`✅ User created with ID: ${data.user.id}`);
 
         res.status(201).json({
             message: 'Signup successful',
@@ -53,7 +54,7 @@ const signup = async (req, res, next) => {
 // ============ LOGIN ============
 const login = async (req, res, next) => {
     try {
-        console.log('📝 Login - Request body:', req.body);
+        console.log('📝 Login - Request received');
 
         const { email, password } = req.body;
 
@@ -69,14 +70,16 @@ const login = async (req, res, next) => {
         });
 
         if (error) {
-            logger.warn(`❌ Failed login attempt for user: ${email} - ${error.message}`);
+            // ✅ SECURE: Log only that a login failed, not which email
+            logger.warn(`❌ Failed login attempt - invalid credentials`);
             return res.status(401).json({
                 error: { message: 'Invalid email or password', status: 401 }
             });
         }
 
-        logger.info(`✅ Successful login for user: ${email}`);
-        console.log(`✅ User logged in: ${email}`);
+        // ✅ SECURE: Log user ID instead of email
+        logger.info(`✅ Successful login for user ID: ${data.user.id}`);
+        console.log(`✅ User logged in with ID: ${data.user.id}`);
 
         res.status(200).json({
             message: 'Login successful',
@@ -89,7 +92,7 @@ const login = async (req, res, next) => {
     }
 };
 
-// ============ LOGOUT (FIXED) ============
+// ============ LOGOUT ============
 const logout = async (req, res, next) => {
     try {
         const token = req.headers.authorization?.split(' ')[1];
@@ -113,25 +116,25 @@ const logout = async (req, res, next) => {
             });
         }
 
-        // ✅ FIX: Sign out from Supabase (local scope = only this session)
+        // Sign out from Supabase (local scope = only this session)
         const { error: signOutError } = await supabase.auth.admin.signOut(token, 'local');
 
         if (signOutError) {
-            logger.warn(`❌ Failed to sign out token: ${signOutError.message}`);
-            // Continue with blacklist even if Supabase signout fails
+            logger.warn(`❌ Failed to sign out token for user ID: ${user.id}`);
         }
 
-        // Add to blacklist (local security)
+        // Add to blacklist
         tokenBlacklist.add(token);
 
-        // Auto-remove after token expires (optional)
+        // Auto-remove after token expires
         setTimeout(() => {
             tokenBlacklist.delete(token);
             console.log(`Token removed from blacklist after expiration`);
-        }, 3600000); // 1 hour
+        }, 3600000);
 
+        // ✅ SECURE: Log user ID instead of email
         logger.info(`✅ User ${user.id} logged out successfully`);
-        console.log(`✅ User logged out: ${user.email}`);
+        console.log(`✅ User logged out with ID: ${user.id}`);
 
         res.status(200).json({ message: 'Logout successful' });
     } catch (error) {
