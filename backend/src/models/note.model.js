@@ -104,6 +104,7 @@ class NoteModel {
             delete safe.id;
             delete safe.user_id;
             delete safe.created_at;
+            delete safe.is_deleted
 
             if (safe.title !== undefined) {
                 safe.title = safe.title.trim();
