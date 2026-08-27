@@ -7,6 +7,10 @@ if (!supabaseUrl || !supabaseAnonKey) {
     throw new Error('Supabase URL and Anon Key must be provided in environment variables.');
 }
 
+if (!supabaseUrl.startsWith('https://')) {
+    throw new Error('SUPABASE_URL must use HTTPS to protect credentials in transit.');
+}
+
 const getUserClient = (token) => {
     return createClient(supabaseUrl, supabaseAnonKey, {
         global: {

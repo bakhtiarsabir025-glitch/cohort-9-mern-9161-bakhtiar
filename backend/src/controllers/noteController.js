@@ -103,7 +103,7 @@ exports.updateNote = async (req, res) => {
         const note = await NoteModel.update(req.token, req.params.id, value);
         return res.status(200).json({ success: true, message: 'Note updated', data: note });
     } catch (error) {
-        if (error.message === 'Note not found') {
+        if (error.message === 'Note not found' || error.code === 'PGRST116') {
             return handleError(res, { message: 'Note not found', code: 'NOT_FOUND' }, 404);
         }
         return handleError(res, error);

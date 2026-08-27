@@ -2,7 +2,7 @@ require('dotenv').config();
 const logger = require('./src/logger');
 
 process.on('uncaughtException', (err) => {
-    logger.fatal('UNCAUGHT EXCEPTION! Shutting down...', { error: err });
+    logger.fatal({ error: err }, 'UNCAUGHT EXCEPTION! Shutting down...');
     process.exit(1);
 });
 
