@@ -1,4 +1,5 @@
 const supabase = require('../config/supabaseClient');
+const logger = require('../logger');
 
 const authMiddleware = async (req, res, next) => {
     try {
@@ -19,8 +20,9 @@ const authMiddleware = async (req, res, next) => {
             return res.status(401).json({ error: { message: 'Invalid token', status: 401 } });
         }
 
-        // Attach the user to the request object
+        // Attach the user and token to the request object
         req.user = data.user;
+        req.token = token;
         next();
     } catch (error) {
         next(error);
