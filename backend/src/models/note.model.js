@@ -37,10 +37,11 @@ class NoteModel {
         try {
             const supabase = getUserClient(token);
 
-            let query = supabase
-                .from('notes')
-                .select('*')
-                .eq('is_deleted', false);
+            let query = supabase.from('notes').select('*');
+
+            if (!filters.includeDeleted) {
+                query = query.eq('is_deleted', false);
+            }
 
             if (filters.category) {
                 query = query.eq('category', filters.category);

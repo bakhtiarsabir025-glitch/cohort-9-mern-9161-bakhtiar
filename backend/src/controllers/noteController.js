@@ -58,7 +58,7 @@ exports.getNotes = async (req, res) => {
         if (error) return handleError(res, error, 400);
 
         const { search, category, sort, page, limit } = value;
-        const notes = await NoteModel.findAll(req.token, { search, category, sort });
+        const notes = await NoteModel.findAll(req.token, { search, category, sort, includeDeleted: true });
 
         const start = (page - 1) * limit;
         const paginated = notes.slice(start, start + limit);

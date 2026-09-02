@@ -1,0 +1,131 @@
+import React, { useState, useEffect } from 'react';
+import { MdClose } from 'react-icons/md';
+import styles from './NoteModal.module.css';
+
+const NoteModal = ({ isOpen, onClose, onSave, note }) => {
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
+  const [category, setCategory] = useState('');
+  const [tags, setTags] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (note) {
+      setTitle(note.title || '');
+      setContent(note.content || '');
+      setCategory(note.category || '');
+      setTags(note.tags ? note.tags.join(', ') : '');
+    } else {
+      setTitle('');
+      setContent('');
+      setCategory('');
+      setTags('');
+    }
+    setError('');
+  }, [note, isOpen]);
+
+  if (!isOpen) return null;
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!title.trim()) return;
+
+    setIsSubmitting(true);
+    setError('');
+    try {
+      const formattedTags = tags
+        .split(',')
+        .map(t => t.trim())
+        .filter(t => t.length > 0);
+
+      const noteData = {
+        title: title.trim(),
+        content: content.trim(),
+        category: category.trim(),
+        tags: formattedTags
+      };
+
+      await onSave(noteData);
+      onClose();
+    } catch (err) {
+      console.error("Failed to save note:", err);
+      setError(err.response?.data?.message || 'Failed to save note. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className={styles.overlay} onClick={onClose}>
+      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+        <div className={styles.header}>
+          <h2>{note ? 'Edit Note' : 'Create Note'}</h2>
+          <button className={styles.closeBtn} onClick={onClose}>
+            <MdClose size={24} />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className={styles.form}>
+          {error && <div style={{ color: '#c53030', backgroundColor: '#fed7d7', padding: '0.75rem', borderRadius: '6px', marginBottom: '1rem', textAlign: 'center', fontWeight: '500' }}>{error}</div>}
+          <div className={styles.formGroup}>
+            <input
+              type="text"
+              placeholder="Title (required)"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className={styles.titleInput}
+              required
+              disabled={isSubmitting}
+            />
+          </div>
+
+          <div className={styles.formGroup}>
+            <textarea
+              placeholder="Take a note... (optional)"
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              className={styles.contentInput}
+              disabled={isSubmitting}
+            />
+          </div>
+
+          <div className={styles.rowGroup}>
+            <div className={styles.formGroup}>
+              <input
+                type="text"
+                placeholder="Category (optional)"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className={styles.metaInput}
+                disabled={isSubmitting}
+              />
+            </div>
+
+            <div className={styles.formGroup}>
+              <input
+                type="text"
+                placeholder="Tags (comma separated)"
+                value={tags}
+                onChange={(e) => setTags(e.target.value)}
+                className={styles.metaInput}
+                disabled={isSubmitting}
+              />
+            </div>
+          </div>
+
+          <div className={styles.footer}>
+            <button type="button" className={styles.cancelBtn} onClick={onClose} disabled={isSubmitting}>
+              Cancel
+            </button>
+            <button type="submit" className={styles.saveBtn} disabled={!title.trim() || isSubmitting}>
+              {isSubmitting ? 'Saving...' : 'Save'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+export default NoteModal;
