@@ -23,6 +23,7 @@ const querySchema = Joi.object({
     search: Joi.string().allow('', null).optional(),
     category: Joi.string().allow('', null).optional(),
     sort: Joi.string().valid('newest', 'oldest', 'recently_updated').default('newest'),
+    status: Joi.string().valid('active', 'archived', 'all').default('active'),
     page: Joi.number().integer().min(1).default(1),
     limit: Joi.number().integer().min(1).max(100).default(50)
 });
@@ -57,20 +58,17 @@ exports.getNotes = async (req, res) => {
         const { error, value } = querySchema.validate(req.query);
         if (error) return handleError(res, error, 400);
 
-        const { search, category, sort, page, limit } = value;
-        const notes = await NoteModel.findAll(req.token, { search, category, sort, includeDeleted: true });
-
-        const start = (page - 1) * limit;
-        const paginated = notes.slice(start, start + limit);
+        const { search, category, sort, status, page, limit } = value;
+        const { data, total } = await NoteModel.findAll(req.token, { search, category, sort, status, page, limit });
 
         return res.status(200).json({
             success: true,
-            data: paginated,
+            data,
             meta: {
-                total: notes.length,
+                total,
                 page,
                 limit,
-                totalPages: Math.ceil(notes.length / limit)
+                totalPages: Math.ceil(total / limit)
             }
         });
     } catch (error) {

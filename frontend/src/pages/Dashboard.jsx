@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { getNotes, createNote, updateNote, deleteNote, restoreNote, pinNote } from '../api/notes';
 import NoteCard from '../components/NoteCard';
@@ -11,21 +11,30 @@ const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState('All'); // All, Active, Archived
   const [error, setError] = useState('');
-  
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingNote, setEditingNote] = useState(null);
 
+  const fetchIdRef = useRef(0);
+
   const fetchNotes = async () => {
+    const requestId = ++fetchIdRef.current;
     try {
       setIsLoading(true);
       setError('');
       const data = await getNotes();
-      setNotes(data || []);
+      if (requestId === fetchIdRef.current) {
+        setNotes(data || []);
+      }
     } catch (error) {
       console.error('Error fetching notes:', error);
-      setError('Failed to fetch notes. Please try again.');
+      if (requestId === fetchIdRef.current) {
+        setError('Failed to fetch notes. Please try again.');
+      }
     } finally {
-      setIsLoading(false);
+      if (requestId === fetchIdRef.current) {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -84,13 +93,13 @@ const Dashboard = () => {
 
   const activeNotes = notes.filter(n => !n.is_deleted);
   const archivedNotes = notes.filter(n => n.is_deleted);
-  
+
   const displayedNotes = (() => {
     let filtered = [];
     if (filter === 'All') filtered = notes;
     else if (filter === 'Active') filtered = activeNotes;
     else if (filter === 'Archived') filtered = archivedNotes;
-    
+
     // Sort pinned notes first, then by updated_at descending
     return filtered.sort((a, b) => {
       if (a.is_pinned && !b.is_pinned) return -1;
@@ -116,26 +125,26 @@ const Dashboard = () => {
       <main className={styles.main}>
         <div className={styles.toolbar}>
           <div className={styles.filters}>
-            <button 
+            <button
               className={`${styles.filterBtn} ${filter === 'All' ? styles.activeFilter : ''}`}
               onClick={() => setFilter('All')}
             >
               All ({notes.length})
             </button>
-            <button 
+            <button
               className={`${styles.filterBtn} ${filter === 'Active' ? styles.activeFilter : ''}`}
               onClick={() => setFilter('Active')}
             >
               Active ({activeNotes.length})
             </button>
-            <button 
+            <button
               className={`${styles.filterBtn} ${filter === 'Archived' ? styles.activeFilter : ''}`}
               onClick={() => setFilter('Archived')}
             >
               Archived ({archivedNotes.length})
             </button>
           </div>
-          
+
           <button className={styles.newNoteBtn} onClick={handleCreateNote}>
             + New Note
           </button>
@@ -150,9 +159,9 @@ const Dashboard = () => {
         ) : (
           <div className={styles.notesGrid}>
             {displayedNotes.map(note => (
-              <NoteCard 
-                key={note.id} 
-                note={note} 
+              <NoteCard
+                key={note.id}
+                note={note}
                 onEdit={handleEditNote}
                 onArchive={handleArchiveNote}
                 onRestore={handleRestoreNote}
@@ -163,8 +172,8 @@ const Dashboard = () => {
         )}
       </main>
 
-      <NoteModal 
-        isOpen={isModalOpen} 
+      <NoteModal
+        isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSave={handleSaveNote}
         note={editingNote}

@@ -61,7 +61,7 @@ const NoteModal = ({ isOpen, onClose, onSave, note }) => {
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.header}>
           <h2>{note ? 'Edit Note' : 'Create Note'}</h2>
-          <button className={styles.closeBtn} onClick={onClose}>
+          <button className={styles.closeBtn} onClick={onClose} aria-label="Close dialog">
             <MdClose size={24} />
           </button>
         </div>
@@ -69,7 +69,9 @@ const NoteModal = ({ isOpen, onClose, onSave, note }) => {
         <form onSubmit={handleSubmit} className={styles.form}>
           {error && <div style={{ color: '#c53030', backgroundColor: '#fed7d7', padding: '0.75rem', borderRadius: '6px', marginBottom: '1rem', textAlign: 'center', fontWeight: '500' }}>{error}</div>}
           <div className={styles.formGroup}>
+            <label htmlFor="note-title" className={styles.srOnly}>Title</label>
             <input
+              id="note-title"
               type="text"
               placeholder="Title (required)"
               value={title}
@@ -81,7 +83,9 @@ const NoteModal = ({ isOpen, onClose, onSave, note }) => {
           </div>
 
           <div className={styles.formGroup}>
+            <label htmlFor="note-content" className={styles.srOnly}>Content</label>
             <textarea
+              id="note-content"
               placeholder="Take a note... (optional)"
               value={content}
               onChange={(e) => setContent(e.target.value)}
@@ -92,7 +96,9 @@ const NoteModal = ({ isOpen, onClose, onSave, note }) => {
 
           <div className={styles.rowGroup}>
             <div className={styles.formGroup}>
+              <label htmlFor="note-category" className={styles.srOnly}>Category</label>
               <input
+                id="note-category"
                 type="text"
                 placeholder="Category (optional)"
                 value={category}
@@ -103,7 +109,9 @@ const NoteModal = ({ isOpen, onClose, onSave, note }) => {
             </div>
 
             <div className={styles.formGroup}>
+              <label htmlFor="note-tags" className={styles.srOnly}>Tags</label>
               <input
+                id="note-tags"
                 type="text"
                 placeholder="Tags (comma separated)"
                 value={tags}
