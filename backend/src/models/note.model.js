@@ -37,10 +37,13 @@ class NoteModel {
         try {
             const supabase = getUserClient(token);
 
-            let query = supabase
-                .from('notes')
-                .select('*')
-                .eq('is_deleted', false);
+            let query = supabase.from('notes').select('*', { count: 'exact' });
+
+            if (filters.status === 'archived') {
+                query = query.eq('is_deleted', true);
+            } else if (filters.status === 'active') {
+                query = query.eq('is_deleted', false);
+            }
 
             if (filters.category) {
                 query = query.eq('category', filters.category);
@@ -61,9 +64,15 @@ class NoteModel {
                 query = query.order('created_at', { ascending: false });
             }
 
-            const { data, error } = await query;
+            const page = filters.page || 1;
+            const limit = filters.limit || 50;
+            const start = (page - 1) * limit;
+            const end = start + limit - 1;
+            query = query.range(start, end);
+
+            const { data, error, count } = await query;
             if (error) throw error;
-            return data || [];
+            return { data: data || [], total: count || 0 };
         } catch (error) {
             logger.error(`NoteModel.findAll failed: ${error.message}`);
             throw error;
