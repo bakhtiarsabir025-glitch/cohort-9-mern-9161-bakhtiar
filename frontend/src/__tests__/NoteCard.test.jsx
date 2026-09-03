@@ -89,4 +89,29 @@ describe('NoteCard Component', () => {
     // Using CSS modules, pinned class will have a hashed name - check via title button
     expect(screen.getByTitle(/unpin note/i)).toBeInTheDocument();
   });
+
+  it('renders rich text content with HTML formatting (sanitized)', () => {
+    const richTextNote = {
+      ...mockNote,
+      content: '<p><strong>Bold text</strong> and a list:</p><ul><li>Item one</li><li>Item two</li></ul>',
+    };
+    const { container } = render(<NoteCard note={richTextNote} {...mockHandlers} />);
+
+    // Confirms actual HTML elements were rendered, not escaped/literal tag text
+    expect(container.querySelector('strong')).toBeInTheDocument();
+    expect(container.querySelector('strong').textContent).toBe('Bold text');
+    expect(container.querySelectorAll('li')).toHaveLength(2);
+    expect(screen.getByText('Item one')).toBeInTheDocument();
+  });
+
+  it('sanitizes dangerous HTML in content (strips script tags)', () => {
+    const maliciousNote = {
+      ...mockNote,
+      content: '<p>Safe text</p><script>window.__xss = true;</script>',
+    };
+    const { container } = render(<NoteCard note={maliciousNote} {...mockHandlers} />);
+
+    expect(screen.getByText('Safe text')).toBeInTheDocument();
+    expect(container.querySelector('script')).not.toBeInTheDocument();
+  });
 });

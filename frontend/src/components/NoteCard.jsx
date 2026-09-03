@@ -1,14 +1,17 @@
 import React from 'react';
+import DOMPurify from 'dompurify';
 import { MdEdit, MdArchive, MdUnarchive, MdPushPin, MdOutlinePushPin } from 'react-icons/md';
 import styles from './NoteCard.module.css';
 
 const NoteCard = ({ note, onEdit, onArchive, onRestore, onPin }) => {
   const { title, content, category, tags, is_pinned, is_deleted, created_at, updated_at } = note;
-  
+
   const formatDate = (dateString) => {
     const options = { year: 'numeric', month: 'short', day: 'numeric' };
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
+
+  const sanitizedContent = DOMPurify.sanitize(content || '');
 
   return (
     <div className={`${styles.card} ${is_pinned ? styles.pinned : ''}`}>
@@ -16,34 +19,34 @@ const NoteCard = ({ note, onEdit, onArchive, onRestore, onPin }) => {
         <h3 className={styles.title}>{title || 'Untitled Note'}</h3>
         <div className={styles.actions}>
           {!is_deleted && (
-            <button 
-              className={`${styles.actionBtn} ${is_pinned ? styles.activePin : ''}`} 
+            <button
+              className={`${styles.actionBtn} ${is_pinned ? styles.activePin : ''}`}
               onClick={() => onPin(note)}
               title={is_pinned ? "Unpin note" : "Pin note"}
             >
               {is_pinned ? <MdPushPin size={18} /> : <MdOutlinePushPin size={18} />}
             </button>
           )}
-          
-          <button 
-            className={styles.actionBtn} 
+
+          <button
+            className={styles.actionBtn}
             onClick={() => onEdit(note)}
             title="Edit note"
           >
             <MdEdit size={18} />
           </button>
-          
+
           {is_deleted ? (
-            <button 
-              className={styles.actionBtn} 
+            <button
+              className={styles.actionBtn}
               onClick={() => onRestore(note)}
               title="Restore note"
             >
               <MdUnarchive size={18} />
             </button>
           ) : (
-            <button 
-              className={styles.actionBtn} 
+            <button
+              className={styles.actionBtn}
               onClick={() => onArchive(note)}
               title="Archive note"
             >
@@ -52,15 +55,16 @@ const NoteCard = ({ note, onEdit, onArchive, onRestore, onPin }) => {
           )}
         </div>
       </div>
-      
+
       {category && (
         <span className={styles.category}>{category}</span>
       )}
-      
-      <div className={styles.content}>
-        <p>{content}</p>
-      </div>
-      
+
+      <div
+        className={styles.content}
+        dangerouslySetInnerHTML={{ __html: sanitizedContent }}
+      />
+
       <div className={styles.footer}>
         <div className={styles.tags}>
           {tags && tags.map((tag, index) => (

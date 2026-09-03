@@ -9,7 +9,7 @@ const Signup = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const { signup } = useAuth();
   const navigate = useNavigate();
 
@@ -24,7 +24,7 @@ const Signup = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    
+
     if (!email || !password || !confirmPassword) {
       setError('Please fill in all fields');
       return;
@@ -51,8 +51,14 @@ const Signup = () => {
       // Backend does not return a session upon signup, so redirect to login
       navigate('/login', { replace: true, state: { message: 'Signup successful! Please log in.' } });
     } catch (err) {
-      setError(err.response?.data?.message || err.message || 'Failed to create an account');
-    } finally {
+      const message =
+        err.response?.data?.error?.message ||
+        err.response?.data?.message ||
+        err.message ||
+        'Failed to create an account';
+      setError(message);
+    }
+    finally {
       setIsLoading(false);
     }
   };
@@ -62,9 +68,9 @@ const Signup = () => {
       <div className={styles.authCard}>
         <h2 className={styles.title}>Create an Account</h2>
         <p className={styles.subtitle}>Sign up to start taking notes.</p>
-        
+
         {error && <div className={styles.errorMessage}>{error}</div>}
-        
+
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.formGroup}>
             <label htmlFor="email">Email</label>
@@ -78,7 +84,7 @@ const Signup = () => {
               required
             />
           </div>
-          
+
           <div className={styles.formGroup}>
             <label htmlFor="password">Password</label>
             <input
@@ -104,12 +110,12 @@ const Signup = () => {
               required
             />
           </div>
-          
+
           <button type="submit" className={styles.submitBtn} disabled={isLoading}>
             {isLoading ? 'Creating account...' : 'Sign Up'}
           </button>
         </form>
-        
+
         <div className={styles.footer}>
           Already have an account? <Link to="/login">Log in here</Link>
         </div>

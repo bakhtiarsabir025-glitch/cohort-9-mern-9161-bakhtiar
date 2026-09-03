@@ -43,7 +43,8 @@ const Login = () => {
         err.message ||
         'Failed to login';
       setError(message);
-    } finally {
+    }
+    finally {
       setIsLoading(false);
     }
   };

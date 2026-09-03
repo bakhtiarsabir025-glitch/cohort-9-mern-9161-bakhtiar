@@ -122,6 +122,29 @@
   font-size: 0.875rem;
 }
 
+.formGroup :global(.ql-toolbar.ql-snow) {
+  border: 1px solid #e2e8f0;
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+  background: #f8fafc;
+}
+
+.formGroup :global(.ql-container.ql-snow) {
+  border: 1px solid #e2e8f0;
+  border-radius: 0 0 8px 8px;
+  font-size: 0.95rem;
+  min-height: 140px;
+}
+
+.formGroup :global(.ql-editor) {
+  min-height: 140px;
+}
+
+.formGroup :global(.ql-editor.ql-blank::before) {
+  color: #a0aec0;
+  font-style: normal;
+}
+
 .footer {
   padding: 1.25rem 1.5rem;
   border-top: 1px solid #edf2f7;

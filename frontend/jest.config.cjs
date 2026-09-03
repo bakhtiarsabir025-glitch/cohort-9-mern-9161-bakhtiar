@@ -14,4 +14,12 @@ module.exports = {
     '<rootDir>/src/__tests__/**/*.test.js',
   ],
   moduleFileExtensions: ['js', 'jsx'],
+  collectCoverageFrom: [
+    'src/**/*.{js,jsx}',
+    '!src/__tests__/**',
+    '!src/main.jsx',
+    '!src/jestPolyfills.js',
+    '!src/setupTests.js',
+  ],
+  coverageReporters: ['lcov', 'text'],
 };

@@ -132,7 +132,8 @@ describe('Notes Endpoints - with mocked Supabase client', () => {
             select: sinon.stub().returnsThis(),
             eq: sinon.stub().returnsThis(),
             order: sinon.stub().returnsThis(),
-            then: (resolve) => resolve({ data: mockNotes, error: null }),
+            range: sinon.stub().returnsThis(),
+            then: (resolve) => resolve({ data: mockNotes, error: null, count: mockNotes.length }),
         };
 
         const mockClient = { from: sinon.stub().returns(mockQuery) };

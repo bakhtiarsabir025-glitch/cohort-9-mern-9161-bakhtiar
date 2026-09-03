@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { MdClose } from 'react-icons/md';
+import ReactQuill from 'react-quill-new';
+import 'react-quill-new/dist/quill.snow.css';
 import styles from './NoteModal.module.css';
 
 const NoteModal = ({ isOpen, onClose, onSave, note }) => {
@@ -36,24 +38,37 @@ const NoteModal = ({ isOpen, onClose, onSave, note }) => {
     try {
       const formattedTags = tags
         .split(',')
-        .map(t => t.trim())
-        .filter(t => t.length > 0);
+        .map((t) => t.trim())
+        .filter((t) => t.length > 0);
 
       const noteData = {
         title: title.trim(),
         content: content.trim(),
         category: category.trim(),
-        tags: formattedTags
+        tags: formattedTags,
       };
 
       await onSave(noteData);
       onClose();
     } catch (err) {
-      console.error("Failed to save note:", err);
+      console.error('Failed to save note:', err);
       setError(err.response?.data?.message || 'Failed to save note. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const quillModules = {
+    toolbar: [
+      [{ header: [1, 2, 3, false] }],
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ color: [] }, { background: [] }],
+      [{ list: 'ordered' }, { list: 'bullet' }, { indent: '-1' }, { indent: '+1' }],
+      ['blockquote', 'code-block'],
+      ['link'],
+      [{ align: [] }],
+      ['clean'],
+    ],
   };
 
   return (
@@ -67,7 +82,21 @@ const NoteModal = ({ isOpen, onClose, onSave, note }) => {
         </div>
 
         <form onSubmit={handleSubmit} className={styles.form}>
-          {error && <div style={{ color: '#c53030', backgroundColor: '#fed7d7', padding: '0.75rem', borderRadius: '6px', marginBottom: '1rem', textAlign: 'center', fontWeight: '500' }}>{error}</div>}
+          {error && (
+            <div
+              style={{
+                color: '#c53030',
+                backgroundColor: '#fed7d7',
+                padding: '0.75rem',
+                borderRadius: '6px',
+                marginBottom: '1rem',
+                textAlign: 'center',
+                fontWeight: '500',
+              }}
+            >
+              {error}
+            </div>
+          )}
           <div className={styles.formGroup}>
             <label htmlFor="note-title" className={styles.srOnly}>Title</label>
             <input
@@ -84,13 +113,14 @@ const NoteModal = ({ isOpen, onClose, onSave, note }) => {
 
           <div className={styles.formGroup}>
             <label htmlFor="note-content" className={styles.srOnly}>Content</label>
-            <textarea
+            <ReactQuill
               id="note-content"
-              placeholder="Take a note... (optional)"
+              theme="snow"
               value={content}
-              onChange={(e) => setContent(e.target.value)}
-              className={styles.contentInput}
-              disabled={isSubmitting}
+              onChange={setContent}
+              modules={quillModules}
+              readOnly={isSubmitting}
+              placeholder="Take a note... (optional)"
             />
           </div>
 
@@ -100,7 +130,7 @@ const NoteModal = ({ isOpen, onClose, onSave, note }) => {
               <input
                 id="note-category"
                 type="text"
-                placeholder="Category (optional)"
+                placeholder="Category "
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
                 className={styles.metaInput}
